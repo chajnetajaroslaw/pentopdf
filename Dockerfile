@@ -2,13 +2,19 @@
 # Build to serve under Subdirectory BASE_URL if provided, eg: "ARG BASE_URL=/pdf/", otherwise leave blank: "ARG BASE_URL="
 ARG BASE_URL=
 
+ARG BUILDPLATFORM
+ARG TARGETPLATFORM
+
 # Build stage
-FROM node:20-alpine AS builder
+FROM --platform=$BUILDPLATFORM node:20-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml ./
 COPY vendor ./vendor
 ENV HUSKY=0
-RUN npm ci
+
+ARG PNPM_FLAGS=
+RUN corepack enable
+RUN pnpm install --frozen-lockfile --prefer-offline --reporter=append-only $PNPM_FLAGS
 COPY . .
 
 # Build without type checking (vite build only)
@@ -23,13 +29,13 @@ ARG BASE_URL
 ENV BASE_URL=$BASE_URL
 
 RUN if [ -z "$BASE_URL" ]; then \
-    npm run build -- --mode production; \
+    pnpm run build -- --mode production; \
     else \
-    npm run build -- --base=${BASE_URL} --mode production; \
+    pnpm run build -- --base=${BASE_URL} --mode production; \
     fi
 
 # Production stage
-FROM nginxinc/nginx-unprivileged:stable-alpine-slim
+FROM --platform=$TARGETPLATFORM nginxinc/nginx-unprivileged:stable-alpine-slim
 
 LABEL org.opencontainers.image.source="https://github.com/alam00000/bentopdf"
 LABEL org.opencontainers.image.url="https://github.com/alam00000/bentopdf"
