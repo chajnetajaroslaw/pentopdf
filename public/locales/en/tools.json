@@ -1,5 +1,6 @@
 {
   "categories": {
+    "favoriteTools": "Favorite Tools",
     "popularTools": "Popular Tools",
     "editAnnotate": "Edit & Annotate",
     "convertToPdf": "Convert to PDF",

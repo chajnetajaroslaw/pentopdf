@@ -11,6 +11,32 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
   disconnect: vi.fn(),
 }));
 
+if (typeof window.DOMMatrix === 'undefined') {
+  (window as any).DOMMatrix = class DOMMatrix {
+    a: number;
+    b: number;
+    c: number;
+    d: number;
+    e: number;
+    f: number;
+
+    constructor(init?: string | number[]) {
+      this.a = 1;
+      this.b = 0;
+      this.c = 0;
+      this.d = 1;
+      this.e = 0;
+      this.f = 0;
+    }
+
+    translate(tx: number, ty: number) {
+      this.e += tx;
+      this.f += ty;
+      return this;
+    }
+  };
+}
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query) => ({

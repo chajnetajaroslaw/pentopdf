@@ -11,6 +11,7 @@ export const supportedLanguages = [
   'tr',
   'id',
   'it',
+  'pl',
 ] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 
@@ -22,11 +23,12 @@ export const languageNames: Record<SupportedLanguage, string> = {
   tr: 'Türkçe',
   id: 'Bahasa Indonesia',
   it: 'Italiano',
+  pl: 'Polski',
 };
 
 export const getLanguageFromUrl = (): SupportedLanguage => {
   const path = window.location.pathname;
-  const langMatch = path.match(/^\/(en|de|zh|vi|tr|id|it)(?:\/|$)/);
+  const langMatch = path.match(/^\/(en|de|zh|vi|tr|id|it|pl)(?:\/|$)/);
   if (
     langMatch &&
     supportedLanguages.includes(langMatch[1] as SupportedLanguage)
@@ -41,7 +43,16 @@ export const getLanguageFromUrl = (): SupportedLanguage => {
     return storedLang as SupportedLanguage;
   }
 
-  return 'en';
+  // Check browser language preferences
+  const browserLangs = navigator.languages || [navigator.language];
+  for (const lang of browserLangs) {
+    const mainLang = lang.split('-')[0]; // 'en-US' -> 'en'
+    if (supportedLanguages.includes(mainLang as SupportedLanguage)) {
+      return mainLang as SupportedLanguage;
+    }
+  }
+
+  return 'pl';
 };
 
 let initialized = false;
@@ -56,7 +67,7 @@ export const initI18n = async (): Promise<typeof i18next> => {
     .use(LanguageDetector)
     .init({
       lng: currentLang,
-      fallbackLng: 'en',
+      fallbackLng: 'pl',
       supportedLngs: supportedLanguages as unknown as string[],
       ns: ['common', 'tools'],
       defaultNS: 'common',
@@ -88,9 +99,9 @@ export const changeLanguage = (lang: SupportedLanguage): void => {
   const currentLang = getLanguageFromUrl();
 
   let newPath: string;
-  if (currentPath.match(/^\/(en|de|zh|vi|tr|id|it)\//)) {
-    newPath = currentPath.replace(/^\/(en|de|zh|vi|tr|id|it)\//, `/${lang}/`);
-  } else if (currentPath.match(/^\/(en|de|zh|vi|tr|id|it)$/)) {
+  if (currentPath.match(/^\/(en|de|zh|vi|tr|id|it|pl)\//)) {
+    newPath = currentPath.replace(/^\/(en|de|zh|vi|tr|id|it|pl)\//, `/${lang}/`);
+  } else if (currentPath.match(/^\/(en|de|zh|vi|tr|id|it|pl)$/)) {
     newPath = `/${lang}`;
   } else {
     newPath = `/${lang}${currentPath}`;
@@ -154,7 +165,7 @@ export const rewriteLinks = (): void => {
       return;
     }
 
-    if (href.match(/^\/(en|de|zh|vi|tr|id|it)\//)) {
+    if (href.match(/^\/(en|de|zh|vi|tr|id|it|pl)\//)) {
       return;
     }
     let newHref: string;

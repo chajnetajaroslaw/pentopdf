@@ -191,6 +191,7 @@ const init = async () => {
   }
 
   const categoryTranslationKeys: Record<string, string> = {
+    'Favorite Tools': 'tools:categories.favoriteTools',
     'Popular Tools': 'tools:categories.popularTools',
     'Edit & Annotate': 'tools:categories.editAnnotate',
     'Convert to PDF': 'tools:categories.convertToPdf',
@@ -275,68 +276,136 @@ const init = async () => {
 
   // Homepage-only tool grid rendering (not used on individual tool pages)
   if (dom.toolGrid) {
-    dom.toolGrid.textContent = '';
+    let favorites = JSON.parse(localStorage.getItem('favoriteTools') || '[]');
 
-    categories.forEach((category) => {
-      const categoryGroup = document.createElement('div');
-      categoryGroup.className = 'category-group col-span-full';
+    const renderTools = () => {
+      dom.toolGrid.textContent = '';
+      const favoritesSection = document.getElementById('favorites-section');
+      const favoritesContainer = favoritesSection.querySelector('[data-category-body="favorites"]');
+      favoritesContainer.innerHTML = '';
 
-      const title = document.createElement('h2');
-      title.className =
-        'text-xl font-bold text-indigo-400 mb-4 mt-8 first:mt-0 text-white';
-      const categoryKey = categoryTranslationKeys[category.name];
-      title.textContent = categoryKey ? t(categoryKey) : category.name;
+      if (favorites.length > 0) {
+        favoritesSection.classList.remove('hidden');
+        favorites.forEach(toolId => {
+          const tool = categories.flatMap(c => c.tools).find(t => t.id === toolId);
+          if (tool) {
+            favoritesContainer.appendChild(createToolCard(tool, true));
+          }
+        });
+      } else {
+        favoritesSection.classList.add('hidden');
+      }
 
-      const toolsContainer = document.createElement('div');
-      toolsContainer.className =
-        'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6';
+      categories.forEach((category) => {
+        const categoryGroup = document.createElement('div');
+        categoryGroup.className = 'category-group col-span-full';
 
-      category.tools.forEach((tool) => {
-        let toolCard: HTMLDivElement | HTMLAnchorElement;
+        const title = document.createElement('h2');
+        title.className =
+          'text-xl font-bold text-indigo-400 mb-4 mt-8 first:mt-0 text-white cursor-pointer';
+        const categoryKey = categoryTranslationKeys[category.name];
+        title.textContent = categoryKey ? t(categoryKey) : category.name;
+        title.dataset.category = category.name.toLowerCase().replace(/\s/g, '-');
 
-        if (tool.href) {
-          toolCard = document.createElement('a');
-          toolCard.href = tool.href;
-          toolCard.className =
-            'tool-card block bg-gray-800 rounded-xl p-4 cursor-pointer flex flex-col items-center justify-center text-center no-underline hover:shadow-lg transition duration-200';
-        } else {
-          toolCard = document.createElement('div');
-          toolCard.className =
-            'tool-card bg-gray-800 rounded-xl p-4 cursor-pointer flex flex-col items-center justify-center text-center hover:shadow-lg transition duration-200';
-          toolCard.dataset.toolId = getToolId(tool);
+        const toolsContainer = document.createElement('div');
+        toolsContainer.className =
+          'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6';
+        toolsContainer.dataset.categoryBody = category.name.toLowerCase().replace(/\s/g, '-');
+
+        const filteredTools = category.tools.filter(tool => !favorites.includes(tool.id));
+
+        if (filteredTools.length > 0) {
+          filteredTools.forEach((tool) => {
+            toolsContainer.appendChild(createToolCard(tool, false));
+          });
+          categoryGroup.append(title, toolsContainer);
+          dom.toolGrid.appendChild(categoryGroup);
         }
-
-        const icon = document.createElement('i');
-        icon.className = 'w-10 h-10 mb-3 text-indigo-400';
-
-        if (tool.icon.startsWith('ph-')) {
-          icon.className = `ph ${tool.icon} text-4xl mb-3 text-indigo-400`;
-        } else {
-          icon.setAttribute('data-lucide', tool.icon);
-        }
-
-        const toolName = document.createElement('h3');
-        toolName.className = 'font-semibold text-white';
-        const toolKey = toolTranslationKeys[tool.name];
-        toolName.textContent = toolKey ? t(`${toolKey}.name`) : tool.name;
-
-        toolCard.append(icon, toolName);
-
-        if (tool.subtitle) {
-          const toolSubtitle = document.createElement('p');
-          toolSubtitle.className = 'text-xs text-gray-400 mt-1 px-2';
-          toolSubtitle.textContent = toolKey
-            ? t(`${toolKey}.subtitle`)
-            : tool.subtitle;
-          toolCard.appendChild(toolSubtitle);
-        }
-
-        toolsContainer.appendChild(toolCard);
       });
 
-      categoryGroup.append(title, toolsContainer);
-      dom.toolGrid.appendChild(categoryGroup);
-    });
+      addToggleFunctionality();
+      createIcons({ icons });
+    };
+
+    const createToolCard = (tool, isFavorite) => {
+      let toolCard: HTMLDivElement | HTMLAnchorElement;
+
+      if (tool.href) {
+        toolCard = document.createElement('a');
+        toolCard.href = tool.href;
+        toolCard.className =
+          'tool-card block bg-gray-800 rounded-xl p-4 cursor-pointer flex flex-col items-center justify-center text-center no-underline hover:shadow-lg transition duration-200 relative';
+      } else {
+        toolCard = document.createElement('div');
+        toolCard.className =
+          'tool-card bg-gray-800 rounded-xl p-4 cursor-pointer flex flex-col items-center justify-center text-center hover:shadow-lg transition duration-200 relative';
+        toolCard.dataset.toolId = getToolId(tool);
+      }
+
+      const star = document.createElement('i');
+      star.className = `ph ${isFavorite ? 'ph-star-fill' : 'ph-star'} absolute top-2 right-2 text-yellow-400 cursor-pointer`;
+      star.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleFavorite(tool.id);
+      });
+
+      const icon = document.createElement('i');
+      icon.className = 'w-10 h-10 mb-3 text-indigo-400';
+
+      if (tool.icon.startsWith('ph-')) {
+        icon.className = `ph ${tool.icon} text-4xl mb-3 text-indigo-400`;
+      } else {
+        icon.setAttribute('data-lucide', tool.icon);
+      }
+
+      const toolName = document.createElement('h3');
+      toolName.className = 'font-semibold text-white';
+      const toolKey = toolTranslationKeys[tool.name];
+      toolName.textContent = toolKey ? t(`${toolKey}.name`) : tool.name;
+
+      toolCard.append(star, icon, toolName);
+
+      if (tool.subtitle) {
+        const toolSubtitle = document.createElement('p');
+        toolSubtitle.className = 'text-xs text-gray-400 mt-1 px-2';
+        toolSubtitle.textContent = toolKey
+          ? t(`${toolKey}.subtitle`)
+          : tool.subtitle;
+        toolCard.appendChild(toolSubtitle);
+      }
+
+      return toolCard;
+    };
+
+    const toggleFavorite = (toolId) => {
+      if (favorites.includes(toolId)) {
+        favorites = favorites.filter(id => id !== toolId);
+      } else {
+        favorites.push(toolId);
+      }
+      localStorage.setItem('favoriteTools', JSON.stringify(favorites));
+      renderTools();
+    };
+
+    const addToggleFunctionality = () => {
+      document.querySelectorAll('[data-category]').forEach(header => {
+        const category = header.dataset.category;
+        const body = document.querySelector(`[data-category-body="${category}"]`);
+        const isCollapsed = localStorage.getItem(`category-${category}-collapsed`) === 'true';
+
+        if (isCollapsed) {
+          body.classList.add('hidden');
+        }
+
+        header.addEventListener('click', () => {
+          body.classList.toggle('hidden');
+          localStorage.setItem(`category-${category}-collapsed`, body.classList.contains('hidden'));
+        });
+      });
+    };
+
+    renderTools();
 
     const searchBar = document.getElementById('search-bar');
     const categoryGroups = dom.toolGrid.querySelectorAll('.category-group');
