@@ -43,7 +43,16 @@ export const getLanguageFromUrl = (): SupportedLanguage => {
     return storedLang as SupportedLanguage;
   }
 
-  return 'en';
+  // Check browser language preferences
+  const browserLangs = navigator.languages || [navigator.language];
+  for (const lang of browserLangs) {
+    const mainLang = lang.split('-')[0]; // 'en-US' -> 'en'
+    if (supportedLanguages.includes(mainLang as SupportedLanguage)) {
+      return mainLang as SupportedLanguage;
+    }
+  }
+
+  return 'pl';
 };
 
 let initialized = false;
@@ -58,7 +67,7 @@ export const initI18n = async (): Promise<typeof i18next> => {
     .use(LanguageDetector)
     .init({
       lng: currentLang,
-      fallbackLng: 'en',
+      fallbackLng: 'pl',
       supportedLngs: supportedLanguages as unknown as string[],
       ns: ['common', 'tools'],
       defaultNS: 'common',
