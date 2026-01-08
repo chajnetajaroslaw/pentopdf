@@ -8,6 +8,11 @@ export default defineConfig({
 
     // Simulate browser environment
     environment: 'jsdom',
+    environmentOptions: {
+      jsdom: {
+        resources: 'usable',
+      },
+    },
 
     // Setup files to run before tests
     setupFiles: ['./src/tests/setup.ts'],
