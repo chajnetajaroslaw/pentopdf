@@ -275,68 +275,143 @@ const init = async () => {
 
   // Homepage-only tool grid rendering (not used on individual tool pages)
   if (dom.toolGrid) {
-    dom.toolGrid.textContent = '';
+    const favorites = new Set(
+      JSON.parse(localStorage.getItem('favoriteTools') || '[]')
+    );
 
-    categories.forEach((category) => {
-      const categoryGroup = document.createElement('div');
-      categoryGroup.className = 'category-group col-span-full';
+    const renderToolGrid = () => {
+      dom.toolGrid.textContent = '';
 
-      const title = document.createElement('h2');
-      title.className =
-        'text-xl font-bold text-indigo-400 mb-4 mt-8 first:mt-0 text-white';
-      const categoryKey = categoryTranslationKeys[category.name];
-      title.textContent = categoryKey ? t(categoryKey) : category.name;
+      const favoriteTools = [];
+      const otherTools = [];
 
-      const toolsContainer = document.createElement('div');
-      toolsContainer.className =
-        'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6';
-
-      category.tools.forEach((tool) => {
-        let toolCard: HTMLDivElement | HTMLAnchorElement;
-
-        if (tool.href) {
-          toolCard = document.createElement('a');
-          toolCard.href = tool.href;
-          toolCard.className =
-            'tool-card block bg-gray-800 rounded-xl p-4 cursor-pointer flex flex-col items-center justify-center text-center no-underline hover:shadow-lg transition duration-200';
-        } else {
-          toolCard = document.createElement('div');
-          toolCard.className =
-            'tool-card bg-gray-800 rounded-xl p-4 cursor-pointer flex flex-col items-center justify-center text-center hover:shadow-lg transition duration-200';
-          toolCard.dataset.toolId = getToolId(tool);
-        }
-
-        const icon = document.createElement('i');
-        icon.className = 'w-10 h-10 mb-3 text-indigo-400';
-
-        if (tool.icon.startsWith('ph-')) {
-          icon.className = `ph ${tool.icon} text-4xl mb-3 text-indigo-400`;
-        } else {
-          icon.setAttribute('data-lucide', tool.icon);
-        }
-
-        const toolName = document.createElement('h3');
-        toolName.className = 'font-semibold text-white';
-        const toolKey = toolTranslationKeys[tool.name];
-        toolName.textContent = toolKey ? t(`${toolKey}.name`) : tool.name;
-
-        toolCard.append(icon, toolName);
-
-        if (tool.subtitle) {
-          const toolSubtitle = document.createElement('p');
-          toolSubtitle.className = 'text-xs text-gray-400 mt-1 px-2';
-          toolSubtitle.textContent = toolKey
-            ? t(`${toolKey}.subtitle`)
-            : tool.subtitle;
-          toolCard.appendChild(toolSubtitle);
-        }
-
-        toolsContainer.appendChild(toolCard);
+      categories.forEach((category) => {
+        category.tools.forEach((tool) => {
+          if (favorites.has(tool.name)) {
+            favoriteTools.push(tool);
+          } else {
+            otherTools.push({ ...tool, category: category.name });
+          }
+        });
       });
 
-      categoryGroup.append(title, toolsContainer);
-      dom.toolGrid.appendChild(categoryGroup);
-    });
+      const createCategorySection = (
+        title,
+        tools,
+        isFavorite = false
+      ) => {
+        const categoryGroup = document.createElement('div');
+        categoryGroup.className = 'category-group col-span-full';
+
+        const titleElement = document.createElement('h2');
+        titleElement.className =
+          'text-xl font-bold text-indigo-400 mb-4 mt-8 first:mt-0 text-white cursor-pointer';
+        titleElement.textContent = title;
+        categoryGroup.appendChild(titleElement);
+
+        const toolsContainer = document.createElement('div');
+        toolsContainer.className =
+          'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6';
+        categoryGroup.appendChild(toolsContainer);
+
+        const isFolded = localStorage.getItem(`${title}-folded`) === 'true';
+        if (isFolded) {
+          toolsContainer.classList.add('hidden');
+        }
+
+        titleElement.addEventListener('click', () => {
+          toolsContainer.classList.toggle('hidden');
+          localStorage.setItem(
+            `${title}-folded`,
+            toolsContainer.classList.contains('hidden').toString()
+          );
+        });
+
+        tools.forEach((tool) => {
+          let toolCard: HTMLDivElement | HTMLAnchorElement;
+
+          if (tool.href) {
+            toolCard = document.createElement('a');
+            toolCard.href = tool.href;
+            toolCard.className =
+              'tool-card block bg-gray-800 rounded-xl p-4 cursor-pointer flex flex-col items-center justify-center text-center no-underline hover:shadow-lg transition duration-200 relative';
+          } else {
+            toolCard = document.createElement('div');
+            toolCard.className =
+              'tool-card bg-gray-800 rounded-xl p-4 cursor-pointer flex flex-col items-center justify-center text-center hover:shadow-lg transition duration-200 relative';
+            toolCard.dataset.toolId = getToolId(tool);
+          }
+
+          const icon = document.createElement('i');
+          icon.className = 'w-10 h-10 mb-3 text-indigo-400';
+
+          if (tool.icon.startsWith('ph-')) {
+            icon.className = `ph ${tool.icon} text-4xl mb-3 text-indigo-400`;
+          } else {
+            icon.setAttribute('data-lucide', tool.icon);
+          }
+
+          const toolName = document.createElement('h3');
+          toolName.className = 'font-semibold text-white';
+          const toolKey = toolTranslationKeys[tool.name];
+          toolName.textContent = toolKey ? t(`${toolKey}.name`) : tool.name;
+
+          toolCard.append(icon, toolName);
+
+          if (tool.subtitle) {
+            const toolSubtitle = document.createElement('p');
+            toolSubtitle.className = 'text-xs text-gray-400 mt-1 px-2';
+            toolSubtitle.textContent = toolKey
+              ? t(`${toolKey}.subtitle`)
+              : tool.subtitle;
+            toolCard.appendChild(toolSubtitle);
+          }
+
+          const star = document.createElement('div');
+          star.className =
+            'absolute top-2 right-2 text-yellow-400 cursor-pointer';
+          star.innerHTML = favorites.has(tool.name)
+            ? '★'
+            : '☆';
+          star.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (favorites.has(tool.name)) {
+              favorites.delete(tool.name);
+            } else {
+              favorites.add(tool.name);
+            }
+            localStorage.setItem(
+              'favoriteTools',
+              JSON.stringify(Array.from(favorites))
+            );
+            renderToolGrid();
+          });
+
+          toolCard.appendChild(star);
+          toolsContainer.appendChild(toolCard);
+        });
+
+        return categoryGroup;
+      };
+
+      if (favoriteTools.length > 0) {
+        dom.toolGrid.appendChild(
+          createCategorySection('Favourite Tools', favoriteTools, true)
+        );
+      }
+
+      categories.forEach((category) => {
+        const tools = otherTools.filter((t) => t.category === category.name);
+        if (tools.length > 0) {
+          const categoryKey = categoryTranslationKeys[category.name];
+          const title = categoryKey ? t(categoryKey) : category.name;
+          dom.toolGrid.appendChild(createCategorySection(title, tools));
+        }
+      });
+    };
+
+    renderToolGrid();
 
     const searchBar = document.getElementById('search-bar');
     const categoryGroups = dom.toolGrid.querySelectorAll('.category-group');

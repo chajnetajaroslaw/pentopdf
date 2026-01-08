@@ -11,6 +11,7 @@ export const supportedLanguages = [
   'tr',
   'id',
   'it',
+  'pl',
 ] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 
@@ -22,11 +23,12 @@ export const languageNames: Record<SupportedLanguage, string> = {
   tr: 'Türkçe',
   id: 'Bahasa Indonesia',
   it: 'Italiano',
+  pl: 'Polski',
 };
 
 export const getLanguageFromUrl = (): SupportedLanguage => {
   const path = window.location.pathname;
-  const langMatch = path.match(/^\/(en|de|zh|vi|tr|id|it)(?:\/|$)/);
+  const langMatch = path.match(/^\/(en|de|zh|vi|tr|id|it|pl)(?:\/|$)/);
   if (
     langMatch &&
     supportedLanguages.includes(langMatch[1] as SupportedLanguage)
@@ -41,7 +43,7 @@ export const getLanguageFromUrl = (): SupportedLanguage => {
     return storedLang as SupportedLanguage;
   }
 
-  return 'en';
+  return 'pl';
 };
 
 let initialized = false;
