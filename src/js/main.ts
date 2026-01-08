@@ -23,6 +23,20 @@ const init = async () => {
   injectLanguageSwitcher();
   applyTranslations();
 
+  const isToolPage = Boolean(document.getElementById('back-to-tools'));
+  if (isToolPage) {
+    const navLinksToRemove = [
+      'a[data-i18n="nav.home"]',
+      'a[data-i18n="nav.about"]',
+      'a[data-i18n="nav.contact"]',
+      'a[data-i18n="nav.licensing"]',
+    ];
+
+    navLinksToRemove.forEach((selector) => {
+      document.querySelectorAll(selector).forEach((el) => el.remove());
+    });
+  }
+
   pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
     import.meta.url

@@ -196,7 +196,82 @@
   },
   "ocrPdf": {
     "name": "OCR PDF",
-    "subtitle": "Spraw, aby PDF był przeszukiwalny i kopiowalny."
+    "subtitle": "Spraw, aby PDF był przeszukiwalny i kopiowalny.",
+    "howItWorks": {
+      "title": "Jak to działa:",
+      "extractText": {
+        "title": "Wyodrębnianie tekstu:",
+        "description": "Wykorzystuje Tesseract OCR do rozpoznawania tekstu ze skanów obrazów lub plików PDF."
+      },
+      "searchableOutput": {
+        "title": "Wynik przeszukiwalny:",
+        "description": "Tworzy nowy plik PDF z niewidoczną warstwą tekstu, dzięki czemu dokument staje się w pełni przeszukiwalny, zachowując oryginalny wygląd."
+      },
+      "characterFiltering": {
+        "title": "Filtrowanie znaków:",
+        "description": "Użyj białych list znaków, aby odfiltrować niechciane znaki i poprawić dokładność dla konkretnych typów dokumentów (faktury, formularze itp.)."
+      },
+      "multiLanguageSupport": {
+        "title": "Obsługa wielu języków:",
+        "description": "Wybierz wiele języków dla dokumentów zawierających tekst w różnych językach."
+      }
+    },
+    "upload": {
+      "clickToSelectPdf": "Kliknij, aby wybrać PDF"
+    },
+    "languages": {
+      "label": "Języki w dokumencie",
+      "searchPlaceholder": "Szukaj języków...",
+      "selectedLabel": "Wybrane:",
+      "none": "Brak"
+    },
+    "advancedSettings": {
+      "title": "Ustawienia zaawansowane (zalecane dla lepszej dokładności)",
+      "resolution": "Rozdzielczość",
+      "resolutionOptions": {
+        "standard": "Standard (192 DPI)",
+        "high": "Wysoka (288 DPI)",
+        "ultra": "Ultra (384 DPI)"
+      },
+      "binarize": "Binaryzuj obraz (zwiększ kontrast dla czystych skanów)",
+      "whitelistPreset": "Preset białej listy znaków",
+      "whitelistPresetOptions": {
+        "none": "Brak (wszystkie znaki)",
+        "alphanumeric": "Alfanumeryczne + podstawowa interpunkcja",
+        "numbersCurrency": "Cyfry + symbole walut",
+        "lettersOnly": "Tylko litery (A-Z, a-z)",
+        "numbersOnly": "Tylko cyfry (0-9)",
+        "invoice": "Faktura/paragon (cyfry, $, ., -, /)",
+        "forms": "Formularze (alfanumeryczne + popularne symbole)",
+        "custom": "Własne..."
+      },
+      "whitelistHint": "Tylko te znaki zostaną rozpoznane. Pozostaw puste, aby rozpoznawać wszystkie znaki.",
+      "whitelistInputLabel": "Biała lista znaków (opcjonalnie)",
+      "whitelistInputPlaceholder": "np. abcdefghijklmnopqrstuvwxyz0123456789$.,"
+    },
+    "actions": {
+      "startOcr": "Start OCR",
+      "copyToClipboard": "Kopiuj do schowka",
+      "downloadTxt": "Pobierz jako .txt",
+      "downloadSearchablePdf": "Pobierz przeszukiwalny PDF"
+    },
+    "progress": {
+      "initializing": "Inicjalizacja..."
+    },
+    "results": {
+      "title": "OCR zakończony",
+      "subtitle": "Twój przeszukiwalny PDF jest gotowy. Możesz też skopiować lub pobrać wyodrębniony tekst poniżej."
+    },
+    "alerts": {
+      "noLanguagesSelectedTitle": "Nie wybrano języków",
+      "noLanguagesSelectedMessage": "Wybierz co najmniej jeden język do OCR.",
+      "noFileTitle": "Brak pliku",
+      "noFileMessage": "Najpierw prześlij plik PDF.",
+      "fontWarningTitle": "Ostrzeżenie o czcionce",
+      "fontWarningMessage": "Nie udało się załadować czcionki dla tego języka. Niektóre znaki mogą się nie wyświetlać poprawnie.",
+      "ocrErrorTitle": "Błąd OCR",
+      "ocrErrorMessage": "Wystąpił błąd podczas OCR. Worker mógł się nie załadować. Spróbuj ponownie."
+    }
   },
   "alternateMix": {
     "name": "Naprzemiennie mieszaj strony",

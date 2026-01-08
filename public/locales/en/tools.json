@@ -196,7 +196,82 @@
   },
   "ocrPdf": {
     "name": "OCR PDF",
-    "subtitle": "Make a PDF searchable and copyable."
+    "subtitle": "Make a PDF searchable and copyable.",
+    "howItWorks": {
+      "title": "How it works:",
+      "extractText": {
+        "title": "Extract Text:",
+        "description": "Uses Tesseract OCR to recognize text from scanned images or PDFs."
+      },
+      "searchableOutput": {
+        "title": "Searchable Output:",
+        "description": "Creates a new PDF with an invisible text layer, making your document fully searchable while preserving the original appearance."
+      },
+      "characterFiltering": {
+        "title": "Character Filtering:",
+        "description": "Use whitelists to filter out unwanted characters and improve accuracy for specific document types (invoices, forms, etc.)."
+      },
+      "multiLanguageSupport": {
+        "title": "Multi-language Support:",
+        "description": "Select multiple languages for documents containing mixed language content."
+      }
+    },
+    "upload": {
+      "clickToSelectPdf": "Click to select PDF"
+    },
+    "languages": {
+      "label": "Languages in Document",
+      "searchPlaceholder": "Search for languages...",
+      "selectedLabel": "Selected:",
+      "none": "None"
+    },
+    "advancedSettings": {
+      "title": "Advanced Settings (Recommended to improve accuracy)",
+      "resolution": "Resolution",
+      "resolutionOptions": {
+        "standard": "Standard (192 DPI)",
+        "high": "High (288 DPI)",
+        "ultra": "Ultra (384 DPI)"
+      },
+      "binarize": "Binarize Image (Enhance Contrast for Clean Scans)",
+      "whitelistPreset": "Character Whitelist Preset",
+      "whitelistPresetOptions": {
+        "none": "None (All characters)",
+        "alphanumeric": "Alphanumeric + Basic Punctuation",
+        "numbersCurrency": "Numbers + Currency Symbols",
+        "lettersOnly": "Letters Only (A-Z, a-z)",
+        "numbersOnly": "Numbers Only (0-9)",
+        "invoice": "Invoice/Receipt (Numbers, $, ., -, /)",
+        "forms": "Forms (Alphanumeric + Common Symbols)",
+        "custom": "Custom..."
+      },
+      "whitelistHint": "Only these characters will be recognized. Leave empty for all characters.",
+      "whitelistInputLabel": "Character Whitelist (Optional)",
+      "whitelistInputPlaceholder": "e.g., abcdefghijklmnopqrstuvwxyz0123456789$.,"
+    },
+    "actions": {
+      "startOcr": "Start OCR",
+      "copyToClipboard": "Copy to Clipboard",
+      "downloadTxt": "Download as .txt",
+      "downloadSearchablePdf": "Download Searchable PDF"
+    },
+    "progress": {
+      "initializing": "Initializing..."
+    },
+    "results": {
+      "title": "OCR Complete",
+      "subtitle": "Your searchable PDF is ready. You can also copy or download the extracted text below."
+    },
+    "alerts": {
+      "noLanguagesSelectedTitle": "No Languages Selected",
+      "noLanguagesSelectedMessage": "Please select at least one language for OCR.",
+      "noFileTitle": "No File",
+      "noFileMessage": "Please upload a PDF file first.",
+      "fontWarningTitle": "Font Warning",
+      "fontWarningMessage": "Could not load the specific font for this language. Some characters may not appear correctly.",
+      "ocrErrorTitle": "OCR Error",
+      "ocrErrorMessage": "An error occurred during the OCR process. The worker may have failed to load. Please try again."
+    }
   },
   "alternateMix": {
     "name": "Alternate & Mix Pages",

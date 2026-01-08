@@ -11,6 +11,12 @@ export const categories = [
           'Merge, Split, Organize, Delete, Rotate, Add Blank Pages, Extract and Duplicate in an unified interface.',
       },
       {
+        href: import.meta.env.BASE_URL + 'ocr-pdf.html',
+        name: 'OCR PDF',
+        icon: 'ph-barcode',
+        subtitle: 'Make a PDF searchable and copyable.',
+      },
+      {
         href: import.meta.env.BASE_URL + 'merge-pdf.html',
         name: 'Merge PDF',
         icon: 'ph-browsers',
@@ -70,12 +76,6 @@ export const categories = [
         name: 'Delete Pages',
         icon: 'ph-trash',
         subtitle: 'Remove specific pages from your document.',
-      },
-      {
-        href: import.meta.env.BASE_URL + 'ocr-pdf.html',
-        name: 'OCR PDF',
-        icon: 'ph-barcode',
-        subtitle: 'Make a PDF searchable and copyable.',
       },
     ],
   },
