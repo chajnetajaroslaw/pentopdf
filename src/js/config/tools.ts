@@ -71,6 +71,12 @@ export const categories = [
         icon: 'ph-trash',
         subtitle: 'Remove specific pages from your document.',
       },
+      {
+        href: import.meta.env.BASE_URL + 'ocr-pdf.html',
+        name: 'OCR PDF',
+        icon: 'ph-barcode',
+        subtitle: 'Make a PDF searchable and copyable.',
+      },
     ],
   },
   {

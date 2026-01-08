@@ -6,7 +6,8 @@
     "convertFromPdf": "Convert from PDF",
     "organizeManage": "Organize & Manage",
     "optimizeRepair": "Optimize & Repair",
-    "securePdf": "Secure PDF"
+    "securePdf": "Secure PDF",
+    "favourites": "Favourites"
   },
   "pdfMultiTool": {
     "name": "PDF Multi Tool",

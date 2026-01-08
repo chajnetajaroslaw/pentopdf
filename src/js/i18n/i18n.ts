@@ -4,6 +4,7 @@ import HttpBackend from 'i18next-http-backend';
 
 // Supported languages
 export const supportedLanguages = [
+  'pl',
   'en',
   'de',
   'zh',
@@ -15,6 +16,7 @@ export const supportedLanguages = [
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 
 export const languageNames: Record<SupportedLanguage, string> = {
+  pl: 'Polski',
   en: 'English',
   de: 'Deutsch',
   zh: '中文',
@@ -26,7 +28,7 @@ export const languageNames: Record<SupportedLanguage, string> = {
 
 export const getLanguageFromUrl = (): SupportedLanguage => {
   const path = window.location.pathname;
-  const langMatch = path.match(/^\/(en|de|zh|vi|tr|id|it)(?:\/|$)/);
+  const langMatch = path.match(/^\/(pl|en|de|zh|vi|tr|id|it)(?:\/|$)/);
   if (
     langMatch &&
     supportedLanguages.includes(langMatch[1] as SupportedLanguage)
@@ -41,6 +43,16 @@ export const getLanguageFromUrl = (): SupportedLanguage => {
     return storedLang as SupportedLanguage;
   }
 
+  // Detect browser/OS language
+  const browserLang = navigator.language || (navigator as any).userLanguage;
+  if (browserLang) {
+    const langCode = browserLang.split('-')[0].toLowerCase();
+    if (supportedLanguages.includes(langCode as SupportedLanguage)) {
+      return langCode as SupportedLanguage;
+    }
+  }
+
+  // Default to Polish
   return 'en';
 };
 
@@ -56,7 +68,7 @@ export const initI18n = async (): Promise<typeof i18next> => {
     .use(LanguageDetector)
     .init({
       lng: currentLang,
-      fallbackLng: 'en',
+      fallbackLng: 'pl',
       supportedLngs: supportedLanguages as unknown as string[],
       ns: ['common', 'tools'],
       defaultNS: 'common',
@@ -88,9 +100,12 @@ export const changeLanguage = (lang: SupportedLanguage): void => {
   const currentLang = getLanguageFromUrl();
 
   let newPath: string;
-  if (currentPath.match(/^\/(en|de|zh|vi|tr|id|it)\//)) {
-    newPath = currentPath.replace(/^\/(en|de|zh|vi|tr|id|it)\//, `/${lang}/`);
-  } else if (currentPath.match(/^\/(en|de|zh|vi|tr|id|it)$/)) {
+  if (currentPath.match(/^\/(pl|en|de|zh|vi|tr|id|it)\//)) {
+    newPath = currentPath.replace(
+      /^\/(pl|en|de|zh|vi|tr|id|it)\//,
+      `/${lang}/`
+    );
+  } else if (currentPath.match(/^\/(pl|en|de|zh|vi|tr|id|it)$/)) {
     newPath = `/${lang}`;
   } else {
     newPath = `/${lang}${currentPath}`;
@@ -154,7 +169,7 @@ export const rewriteLinks = (): void => {
       return;
     }
 
-    if (href.match(/^\/(en|de|zh|vi|tr|id|it)\//)) {
+    if (href.match(/^\/(pl|en|de|zh|vi|tr|id|it)\//)) {
       return;
     }
     let newHref: string;

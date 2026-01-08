@@ -16,6 +16,7 @@ import {
   t,
 } from './i18n/index.js';
 import { startBackgroundPreload } from './utils/wasm-preloader.js';
+import { initFavourites } from './favourites.js';
 
 const init = async () => {
   await initI18n();
@@ -275,85 +276,27 @@ const init = async () => {
 
   // Homepage-only tool grid rendering (not used on individual tool pages)
   if (dom.toolGrid) {
-    dom.toolGrid.textContent = '';
-
-    categories.forEach((category) => {
-      const categoryGroup = document.createElement('div');
-      categoryGroup.className = 'category-group col-span-full';
-
-      const title = document.createElement('h2');
-      title.className =
-        'text-xl font-bold text-indigo-400 mb-4 mt-8 first:mt-0 text-white';
-      const categoryKey = categoryTranslationKeys[category.name];
-      title.textContent = categoryKey ? t(categoryKey) : category.name;
-
-      const toolsContainer = document.createElement('div');
-      toolsContainer.className =
-        'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6';
-
-      category.tools.forEach((tool) => {
-        let toolCard: HTMLDivElement | HTMLAnchorElement;
-
-        if (tool.href) {
-          toolCard = document.createElement('a');
-          toolCard.href = tool.href;
-          toolCard.className =
-            'tool-card block bg-gray-800 rounded-xl p-4 cursor-pointer flex flex-col items-center justify-center text-center no-underline hover:shadow-lg transition duration-200';
-        } else {
-          toolCard = document.createElement('div');
-          toolCard.className =
-            'tool-card bg-gray-800 rounded-xl p-4 cursor-pointer flex flex-col items-center justify-center text-center hover:shadow-lg transition duration-200';
-          toolCard.dataset.toolId = getToolId(tool);
-        }
-
-        const icon = document.createElement('i');
-        icon.className = 'w-10 h-10 mb-3 text-indigo-400';
-
-        if (tool.icon.startsWith('ph-')) {
-          icon.className = `ph ${tool.icon} text-4xl mb-3 text-indigo-400`;
-        } else {
-          icon.setAttribute('data-lucide', tool.icon);
-        }
-
-        const toolName = document.createElement('h3');
-        toolName.className = 'font-semibold text-white';
-        const toolKey = toolTranslationKeys[tool.name];
-        toolName.textContent = toolKey ? t(`${toolKey}.name`) : tool.name;
-
-        toolCard.append(icon, toolName);
-
-        if (tool.subtitle) {
-          const toolSubtitle = document.createElement('p');
-          toolSubtitle.className = 'text-xs text-gray-400 mt-1 px-2';
-          toolSubtitle.textContent = toolKey
-            ? t(`${toolKey}.subtitle`)
-            : tool.subtitle;
-          toolCard.appendChild(toolSubtitle);
-        }
-
-        toolsContainer.appendChild(toolCard);
-      });
-
-      categoryGroup.append(title, toolsContainer);
-      dom.toolGrid.appendChild(categoryGroup);
-    });
+    // Initialize favourites system with foldable sections
+    initFavourites(
+      dom.toolGrid,
+      t,
+      toolTranslationKeys,
+      categoryTranslationKeys
+    );
 
     const searchBar = document.getElementById('search-bar');
-    const categoryGroups = dom.toolGrid.querySelectorAll('.category-group');
 
-    const searchResultsContainer = document.createElement('div');
-    searchResultsContainer.id = 'search-results';
-    searchResultsContainer.className =
-      'hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 col-span-full';
-    dom.toolGrid.insertBefore(searchResultsContainer, dom.toolGrid.firstChild);
-
-    searchBar.addEventListener('input', () => {
+    searchBar?.addEventListener('input', () => {
       // @ts-expect-error TS(2339) FIXME: Property 'value' does not exist on type 'HTMLEleme... Remove this comment to see the full error message
       const searchTerm = searchBar.value.toLowerCase().trim();
+      const categoryGroups = dom.toolGrid.querySelectorAll('.category-group');
+      const searchResultsContainer = document.getElementById('search-results');
 
       if (!searchTerm) {
-        searchResultsContainer.classList.add('hidden');
-        searchResultsContainer.innerHTML = '';
+        if (searchResultsContainer) {
+          searchResultsContainer.classList.add('hidden');
+          searchResultsContainer.innerHTML = '';
+        }
         categoryGroups.forEach((group) => {
           (group as HTMLElement).style.display = '';
           const toolCards = group.querySelectorAll('.tool-card');
@@ -368,46 +311,49 @@ const init = async () => {
         (group as HTMLElement).style.display = 'none';
       });
 
-      searchResultsContainer.innerHTML = '';
-      searchResultsContainer.classList.remove('hidden');
+      if (searchResultsContainer) {
+        searchResultsContainer.innerHTML = '';
+        searchResultsContainer.classList.remove('hidden');
 
-      const seenToolIds = new Set<string>();
-      const allTools: HTMLElement[] = [];
+        const seenToolIds = new Set<string>();
+        const allTools: HTMLElement[] = [];
 
-      categoryGroups.forEach((group) => {
-        const toolCards = Array.from(group.querySelectorAll('.tool-card'));
+        categoryGroups.forEach((group) => {
+          const toolCards = Array.from(group.querySelectorAll('.tool-card'));
 
-        toolCards.forEach((card) => {
-          const toolName = (
-            card.querySelector('h3')?.textContent || ''
-          ).toLowerCase();
-          const toolSubtitle = (
-            card.querySelector('p')?.textContent || ''
-          ).toLowerCase();
-          const toolHref =
-            (card as HTMLAnchorElement).href ||
-            (card as HTMLElement).dataset.toolId ||
-            '';
+          toolCards.forEach((card) => {
+            const toolName = (
+              card.querySelector('h3')?.textContent || ''
+            ).toLowerCase();
+            const toolSubtitle = (
+              card.querySelector('p')?.textContent || ''
+            ).toLowerCase();
+            const toolHref =
+              (card as HTMLAnchorElement).href ||
+              (card as HTMLElement).dataset.toolId ||
+              '';
 
-          const toolId =
-            toolHref.split('/').pop()?.replace('.html', '') || toolName;
+            const toolId =
+              toolHref.split('/').pop()?.replace('.html', '') || toolName;
 
-          const isMatch =
-            toolName.includes(searchTerm) || toolSubtitle.includes(searchTerm);
-          const isDuplicate = seenToolIds.has(toolId);
+            const isMatch =
+              toolName.includes(searchTerm) ||
+              toolSubtitle.includes(searchTerm);
+            const isDuplicate = seenToolIds.has(toolId);
 
-          if (isMatch && !isDuplicate) {
-            seenToolIds.add(toolId);
-            allTools.push(card.cloneNode(true) as HTMLElement);
-          }
+            if (isMatch && !isDuplicate) {
+              seenToolIds.add(toolId);
+              allTools.push(card.cloneNode(true) as HTMLElement);
+            }
+          });
         });
-      });
 
-      allTools.forEach((tool) => {
-        searchResultsContainer.appendChild(tool);
-      });
+        allTools.forEach((tool) => {
+          searchResultsContainer.appendChild(tool);
+        });
 
-      createIcons({ icons });
+        createIcons({ icons });
+      }
     });
 
     window.addEventListener('keydown', function (e) {
@@ -418,7 +364,7 @@ const init = async () => {
 
       if (isCtrlK || isCmdK) {
         e.preventDefault();
-        searchBar.focus();
+        searchBar?.focus();
       }
     });
 
