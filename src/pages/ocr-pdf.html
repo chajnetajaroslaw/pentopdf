@@ -330,6 +330,21 @@
                 data-i18n-placeholder="tools:ocrPdf.languages.searchPlaceholder"
                 placeholder="Search for languages..."
               />
+              <!-- Selected Languages Display -->
+              <div
+                class="bg-indigo-900 border border-indigo-600 rounded-lg p-3 mb-2"
+              >
+                <p class="text-sm text-indigo-200 mb-1">
+                  <span data-i18n="tools:ocrPdf.languages.selectedLabel"
+                    >Selected:</span
+                  >
+                </p>
+                <span
+                  id="selected-langs-display"
+                  class="font-semibold text-white text-base block"
+                  >None</span
+                >
+              </div>
               <div
                 id="lang-list"
                 class="max-h-48 overflow-y-auto border border-gray-600 rounded-lg p-2 bg-gray-900"
@@ -337,14 +352,6 @@
                 <!-- Language checkboxes will be populated by JS -->
               </div>
             </div>
-            <p class="text-base text-gray-200 mt-2">
-              <span data-i18n="tools:ocrPdf.languages.selectedLabel"
-                >Selected:</span
-              >
-              <span id="selected-langs-display" class="font-semibold text-white"
-                >None</span
-              >
-            </p>
           </div>
 
           <!-- Advanced settings -->
